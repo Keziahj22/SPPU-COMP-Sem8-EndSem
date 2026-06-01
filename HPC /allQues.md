@@ -444,6 +444,173 @@ T=\log_2(p)(t_s+t_wm)
 ]
 
 ---
+# 14. Explain Broadcast and Reduce operations with diagram.
+
+In **parallel computing**, **broadcast** and **reduction** are two common communication operations used among multiple processors.
+
+---
+
+## 1. Broadcast
+
+**Broadcast** means:
+
+> One processor sends the same data to all other processors.
+
+### Example
+
+Suppose Processor P0 has a value:
+
+```text
+P0 = 100
+P1 = ?
+P2 = ?
+P3 = ?
+```
+
+After broadcast from P0:
+
+```text
+P0 = 100
+P1 = 100
+P2 = 100
+P3 = 100
+```
+
+### Diagram
+
+```text
+        P1
+       ↗
+P0 → P2
+       ↘
+        P3
+```
+
+P0 sends the same message to every processor.
+
+### Why Broadcast?
+
+Used when all processors need the same information:
+
+* Initial parameters
+* Input data
+* Configuration values
+* Shared constants
+
+### MPI Example
+
+```c
+MPI_Bcast(&data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+```
+
+Meaning:
+
+* Process 0 is the sender.
+* All processes receive `data`.
+
+---
+
+## 2. Reduction
+
+**Reduction** means:
+
+> Collect values from all processors and combine them using an operation such as sum, max, min, etc.
+
+### Example (Sum Reduction)
+
+Processors contain:
+
+```text
+P0 = 5
+P1 = 10
+P2 = 20
+P3 = 15
+```
+
+Reduction using **SUM**:
+
+```text
+5 + 10 + 20 + 15 = 50
+```
+
+Result:
+
+```text
+P0 = 50   (or designated root process)
+```
+
+### Diagram
+
+```text
+P1 ↘
+     \
+P2 → SUM → P0
+     /
+P3 ↗
+```
+
+All values move toward a root process and are combined.
+
+---
+
+## Common Reduction Operations
+
+| Operation | Example              |
+| --------- | -------------------- |
+| SUM       | 5+10+20+15 = 50      |
+| MAX       | max(5,10,20,15) = 20 |
+| MIN       | min(5,10,20,15) = 5  |
+| PRODUCT   | 5×10×20×15           |
+| AND/OR    | Logical operations   |
+
+---
+
+## MPI Example
+
+```c
+MPI_Reduce(&local,
+           &global,
+           1,
+           MPI_INT,
+           MPI_SUM,
+           0,
+           MPI_COMM_WORLD);
+```
+
+This computes the sum of all processors' values and stores it in process 0.
+
+---
+
+## Broadcast vs Reduction
+
+| Feature   | Broadcast                    | Reduction                 |
+| --------- | ---------------------------- | ------------------------- |
+| Direction | One → Many                   | Many → One                |
+| Purpose   | Distribute data              | Collect and combine data  |
+| Input     | One process has data         | Every process has data    |
+| Output    | All processes get same value | Root gets combined result |
+
+### Simple Analogy
+
+Imagine a classroom:
+
+**Broadcast**
+
+* Teacher announces: "Exam is on Monday."
+* Every student receives the same message.
+
+**Reduction**
+
+* Each student submits their marks.
+* Teacher adds all marks and gets the class total.
+
+So:
+
+```text
+Broadcast  = One → All
+Reduction  = All → One
+```
+
 
 # PRIORITY 2 ⭐⭐⭐⭐
 
